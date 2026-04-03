@@ -1,0 +1,23 @@
+{
+  "name": "@yasnen/fvtt-tools",
+  "version": "1.0.0",
+  "description": "Foundry VTT module/localization development CLI tools",
+  "type": "module",
+  "bin": {
+    "fvtt-tools": "bin/fvtt-tools.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yasnen/fvtt-tools.git"
+  },
+  "keywords": ["foundryvtt", "fvtt", "localization", "module", "cli"],
+  "license": "MIT"
+}
