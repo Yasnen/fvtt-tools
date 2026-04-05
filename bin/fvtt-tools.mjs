@@ -10,6 +10,7 @@ const COMMANDS = {
   'report':          () => import('../src/commands/report.mjs'),
   'validate':        () => import('../src/commands/validate.mjs'),
   'placeholder-list':() => import('../src/commands/placeholder-list.mjs'),
+  'i18n-diff':       () => import('../src/commands/i18n-diff.mjs'),
 };
 
 const [,, command, ...rest] = process.argv;
@@ -23,6 +24,7 @@ if (!command || command === '--help' || command === '-h') {
   report           翻訳カバレッジをレポート表示
   validate         Babele 辞書 JSON の構造チェック
   placeholder-list 翻訳ファイル内のプレースホルダを一覧表示
+  i18n-diff        言語ファイルの差分比較と cherry-pick 可否判定
 
 各コマンドの詳細: fvtt-tools <command> --help
 `);
