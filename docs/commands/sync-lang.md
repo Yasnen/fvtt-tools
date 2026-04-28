@@ -20,6 +20,9 @@ fvtt-tools sync-lang <新en.json> [オプション]
 | `--out <path>` | `--ja` と同じ | 出力先パス |
 | `--extra-marker <key>` | — | extra セクション開始マーカーキー |
 | `--extra-prefix <prefix>` | — | ORPHAN 除外プレフィックス（カンマ区切り複数指定可） |
+| `--placeholder-sep <str>` | `.` | プレースホルダ内の数字前に付ける文字列 |
+| `--placeholder-mark <str>` | `===` | プレースホルダの囲み文字列 |
+| `--placeholder-digits <n>` | `3` | 連番の桁数 |
 | `--dry-run` | — | ファイルを変更せず差分のみ表示 |
 | `--update-base` | — | 同期後に `en-base.json` を新 en.json で上書き更新 |
 
@@ -145,6 +148,51 @@ fvtt-tools sync-lang /path/to/en.json --dry-run
 # 問題なければ実際に適用
 fvtt-tools sync-lang /path/to/en.json --update-base
 ```
+
+---
+
+## プレースホルダのフォーマット
+
+`[NEW]` キーに付与されるプレースホルダは以下の形式:
+
+```
+<mark>(<sep><digits桁連番>)<mark>
+```
+
+デフォルトは `===(.001)===`。各部分は個別に変更できる。
+
+| オプション | 変更箇所 | デフォルト | 例 |
+|-----------|---------|-----------|---|
+| `--placeholder-mark` | `===` の部分 | `===` | `##` → `##(.001)##` |
+| `--placeholder-sep` | `.` の部分 | `.` | `_` → `===(_001)===` |
+| `--placeholder-digits` | `001` の桁数 | `3` | `2` → `===(.01)===` |
+
+**例:**
+
+```bash
+# デフォルト: ===(.001)===
+fvtt-tools sync-lang /path/to/en.json
+
+# 2桁連番: ===(.01)===
+fvtt-tools sync-lang /path/to/en.json --placeholder-digits 2
+
+# アンダースコア区切り: ===(_001)===
+fvtt-tools sync-lang /path/to/en.json --placeholder-sep "_"
+
+# 囲み文字を変更: ##(.001)##
+fvtt-tools sync-lang /path/to/en.json --placeholder-mark "##"
+
+# 組み合わせ: ##_01##
+fvtt-tools sync-lang /path/to/en.json \
+  --placeholder-mark "##" \
+  --placeholder-sep "_" \
+  --placeholder-digits 2
+```
+
+> **注意:** `report` や `placeholder-list` はデフォルト形式 `===(.XXX)===` でプレースホルダを検出する。
+> フォーマットを変更した場合、これらのコマンドでは検出されなくなる。
+
+---
 
 ## Tips
 

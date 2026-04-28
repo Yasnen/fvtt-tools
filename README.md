@@ -43,10 +43,13 @@ fvtt-tools sync-lang <新en.json> [オプション]
   --base <path>          旧 en.json             (デフォルト: lang/en-base.json)
   --ja   <path>          翻訳ファイル           (デフォルト: lang/ja.json)
   --out  <path>          出力先                 (デフォルト: --ja と同じ)
-  --extra-marker <key>   extra セクション開始マーカーキー
-  --extra-prefix <pfx>   ORPHAN 除外プレフィックス（カンマ区切り）
-  --dry-run              差分のみ表示
-  --update-base          同期後に en-base.json を更新
+  --extra-marker <key>      extra セクション開始マーカーキー
+  --extra-prefix <pfx>      ORPHAN 除外プレフィックス（カンマ区切り）
+  --placeholder-sep <str>   プレースホルダの数字前文字列 (デフォルト: ".")
+  --placeholder-mark <str>  プレースホルダの囲み文字列   (デフォルト: "===")
+  --placeholder-digits <n>  連番の桁数                  (デフォルト: 3)
+  --dry-run                 差分のみ表示
+  --update-base             同期後に en-base.json を更新
 ```
 
 ```bash

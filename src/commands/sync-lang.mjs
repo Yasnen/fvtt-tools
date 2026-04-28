@@ -157,8 +157,10 @@ if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
   --out            <path>    出力先（デフォルト: --ja と同じパス）
   --extra-marker   <key>     extraセクション開始マーカーキー（省略時: 機能無効）
   --extra-prefix   <prefix>  ORPHAN除外するキープレフィックス（カンマ区切りで複数指定可）
-  --placeholder-sep <str>   プレースホルダの数字前の文字列（デフォルト: "."）
-  --dry-run                  ファイルを変更せず差分・警告のみ表示
+  --placeholder-sep    <str>  プレースホルダの数字前の文字列（デフォルト: "."）
+  --placeholder-mark   <str>  プレースホルダの囲み文字列（デフォルト: "==="）
+  --placeholder-digits <n>    連番の桁数（デフォルト: 3）
+  --dry-run                   ファイルを変更せず差分・警告のみ表示
   --update-base              同期後に en-base.json を新en.jsonで更新
 
 例:
@@ -181,8 +183,10 @@ let jaPath        = resolve(CWD, 'lang/ja.json');
 let outPath       = null;
 let extraMarker      = null;
 let extraPrefixes    = [];
-let placeholderSep   = '.';
-let dryRun           = false;
+let placeholderSep    = '.';
+let placeholderMark   = '===';
+let placeholderDigits = 3;
+let dryRun            = false;
 let updateBase       = false;
 
 for (let i = 0; i < args.length; i++) {
@@ -194,7 +198,9 @@ for (let i = 0; i < args.length; i++) {
     case '--extra-prefix':
       extraPrefixes = args[++i].split(',').map(s => s.trim()).filter(Boolean);
       break;
-    case '--placeholder-sep': placeholderSep = args[++i]; break;
+    case '--placeholder-sep':    placeholderSep    = args[++i]; break;
+    case '--placeholder-mark':   placeholderMark   = args[++i]; break;
+    case '--placeholder-digits': placeholderDigits = parseInt(args[++i], 10); break;
     case '--dry-run':      dryRun        = true; break;
     case '--update-base':  updateBase    = true; break;
     default:
@@ -277,9 +283,8 @@ for (const [path, newEnVal] of Object.entries(flatNewEn)) {
     }
     if (jaVal !== newEnVal) flatReplacements.set(path, jaVal);
   } else {
-    const seq = String(++counter.n).padStart(3, '0');
-    // プレースホルダ形式: ===(<sep><3桁連番>)=== （sep は --placeholder-sep で変更可能）
-    const placeholder = `===(${placeholderSep}${seq})===`;
+    const seq = String(++counter.n).padStart(placeholderDigits, '0');
+    const placeholder = `${placeholderMark}(${placeholderSep}${seq})${placeholderMark}`;
     warnings.newKeys.push({ path, newVal: newEnVal, placeholder });
     flatReplacements.set(path, newEnVal + placeholder);
   }
