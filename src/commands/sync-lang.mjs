@@ -13,6 +13,8 @@
  *   --out            <path>    出力先（デフォルト: --ja と同じパス）
  *   --extra-marker   <key>     extraセクション開始マーカーキー（省略時: 機能無効）
  *   --extra-prefix   <prefix>  ORPHAN除外するキープレフィックス（省略時: なし）
+ *   --placeholder-sep <str>    新規キーに付与するプレースホルダ内の区切り文字列（デフォルト: "."）
+ *                              例: "." → ===(. 001)===、"_" → ===(_001)===
  *   --dry-run                  ファイルを変更せず差分・警告のみ表示
  *   --update-base              同期後に en-base.json を新en.jsonで更新
  */
@@ -174,6 +176,7 @@ const CWD = process.cwd();
 
 let newEnPath     = null;
 let basePath      = resolve(CWD, 'lang/en-base.json');
+let baseExplicit  = false;
 let jaPath        = resolve(CWD, 'lang/ja.json');
 let outPath       = null;
 let extraMarker      = null;
@@ -184,7 +187,7 @@ let updateBase       = false;
 
 for (let i = 0; i < args.length; i++) {
   switch (args[i]) {
-    case '--base':         basePath      = resolve(args[++i]); break;
+    case '--base':         basePath = resolve(args[++i]); baseExplicit = true; break;
     case '--ja':           jaPath        = resolve(args[++i]); break;
     case '--out':          outPath       = resolve(args[++i]); break;
     case '--extra-marker': extraMarker   = args[++i]; break;
@@ -220,8 +223,13 @@ const ja    = loadJson(jaPath,    '翻訳ファイル');
 let base = null;
 try {
   base = loadJson(basePath, 'en-base.json');
-} catch {
-  // en-base.json が存在しない場合は CHANGED 検出をスキップ
+} catch (e) {
+  if (baseExplicit) {
+    console.error(`エラー: --base で指定されたファイルが読み込めません: ${basePath}`);
+    console.error(e.message);
+    process.exit(1);
+  }
+  // デフォルトパスが存在しない場合は CHANGED 検出をスキップ
 }
 
 // ===== フラット化 =====
@@ -270,6 +278,7 @@ for (const [path, newEnVal] of Object.entries(flatNewEn)) {
     if (jaVal !== newEnVal) flatReplacements.set(path, jaVal);
   } else {
     const seq = String(++counter.n).padStart(3, '0');
+    // プレースホルダ形式: ===(<sep><3桁連番>)=== （sep は --placeholder-sep で変更可能）
     const placeholder = `===(${placeholderSep}${seq})===`;
     warnings.newKeys.push({ path, newVal: newEnVal, placeholder });
     flatReplacements.set(path, newEnVal + placeholder);
