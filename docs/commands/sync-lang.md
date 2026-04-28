@@ -39,6 +39,85 @@ fvtt-tools sync-lang <新en.json> [オプション]
 - `新en` に存在し `base` に存在しないキー → `[NEW]`（翻訳ファイルに追記）
 - `翻訳` に存在し `新en` に存在しないキー → `[ORPHAN]`（`--extra-prefix` に一致すれば除外）
 
+---
+
+## extra セクションと ORPHAN 除外の詳細
+
+### extra セクション（`--extra-marker`）
+
+翻訳ファイルには、上流 en.json に存在しない**独自追加キー**を末尾にまとめて置くことがある。
+これを「extra セクション」と呼ぶ。
+
+`--extra-marker <key>` を指定すると、`--ja` ファイルのトップレベルキーの中で
+指定キー以降をすべて extra セクションとして扱う。
+
+**効果:**
+
+| 動作 | 説明 |
+|------|------|
+| ORPHAN 除外 | extra セクション内のキーは ORPHAN として報告されない |
+| 出力への保持 | extra セクションの内容を出力ファイルの末尾に自動で追記する |
+
+**出力時の挙動（重要）:**
+`sync-lang` の出力は `新en.json` の生テキストをベースに翻訳値を上書きする形式。
+extra セクションは `新en.json` に存在しないため、`--extra-marker` が指定されていないと
+**出力ファイルから消える**。`--extra-marker` を指定することで末尾に再付加される。
+
+**例:**
+
+```json
+// ja.json（抜粋）
+{
+  "WFRP4E.Skill.Name": "技能名",
+  "WFRP4eJaJp.comment.core-en.json": "=== extra section ===",  ← マーカーキー
+  "WFRP4eJaJp.someCustomKey": "独自追加の翻訳"
+}
+```
+
+```bash
+# このマーカーキー以降が extra セクションとして扱われる
+fvtt-tools sync-lang /path/to/en.json \
+  --extra-marker "WFRP4eJaJp.comment.core-en.json"
+```
+
+---
+
+### ORPHAN 除外プレフィックス（`--extra-prefix`）
+
+`--extra-prefix <prefix>` を指定すると、ORPHAN 検出時に
+指定プレフィックスで始まるキーをスキップする。
+
+**`--extra-marker` との違い:**
+
+| | `--extra-marker` | `--extra-prefix` |
+|---|---|---|
+| ORPHAN 除外 | ✅ マーカー以降の全キー | ✅ プレフィックス一致キー |
+| 出力への保持 | ✅ 自動で末尾に追記 | ❌ 保持しない（キーが消える） |
+| 対象の決まり方 | `ja.json` のキー順序（マーカー位置） | プレフィックス文字列 |
+
+**使い分けの目安:**
+- 独自追加キーを**出力ファイルにも残したい** → `--extra-marker`（+ `--extra-prefix` を併用して誤検知抑制）
+- 上流から削除されたキーを**意図的に残している**が出力には不要 → `--extra-prefix` のみ
+
+**カンマ区切りで複数指定可能:**
+
+```bash
+--extra-prefix "WFRP4eJaJp.,MyModule."
+```
+
+---
+
+### 両オプションの組み合わせ（推奨パターン）
+
+```bash
+fvtt-tools sync-lang /path/to/en.json \
+  --extra-marker "WFRP4eJaJp.comment.core-en.json" \
+  --extra-prefix "WFRP4eJaJp."
+```
+
+- `--extra-marker` で extra セクションを出力に保持
+- `--extra-prefix` でプレフィックス一致キーをさらに ORPHAN 除外（マーカーより前に同プレフィックスのキーが紛れ込んでいても安全）
+
 ## 使用例
 
 ### 基本
