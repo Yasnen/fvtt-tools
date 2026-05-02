@@ -32,6 +32,7 @@ npm install --save-dev github:Yasnen/fvtt-tools
 | `validate` | Babele 辞書 JSON の構造チェック | [→](docs/commands/validate.md) |
 | `placeholder-list` | 翻訳ファイル内のプレースホルダを一覧表示 | [→](docs/commands/placeholder-list.md) |
 | `fix-pack-names` | fvtt unpack 後の非 ASCII ファイル名を修正 | [→](docs/commands/fix-pack-names.md) |
+| `pack-to-json` | NeDB(.db) パックを個別 JSON ファイルに変換 | [→](docs/commands/pack-to-json.md) |
 
 ---
 
@@ -142,6 +143,23 @@ fvtt-tools fix-pack-names src/packs/macros
 ```
 
 [詳細 →](docs/commands/fix-pack-names.md)
+
+---
+
+### `pack-to-json`
+
+```
+fvtt-tools pack-to-json <pack.db> [オプション]
+
+  --out    <dir>  出力ディレクトリ  (デフォルト: ./<pack名>/)
+  --indent <n>    JSON インデント幅 (デフォルト: 2)
+```
+
+```bash
+fvtt-tools pack-to-json packs/macros.db --out src/packs/macros
+```
+
+[詳細 →](docs/commands/pack-to-json.md)
 
 ---
 

@@ -7,6 +7,7 @@
 const COMMANDS = {
   'sync-lang':       () => import('../src/commands/sync-lang.mjs'),
   'fix-pack-names':  () => import('../src/commands/fix-pack-names.mjs'),
+  'pack-to-json':    () => import('../src/commands/pack-to-json.mjs'),
   'report':          () => import('../src/commands/report.mjs'),
   'validate':        () => import('../src/commands/validate.mjs'),
   'placeholder-list':() => import('../src/commands/placeholder-list.mjs'),
@@ -21,6 +22,7 @@ if (!command || command === '--help' || command === '-h') {
 コマンド:
   sync-lang        上流 en.json と翻訳ファイルを三方向マージで同期
   fix-pack-names   fvtt unpack 後の非ASCII ファイル名を修正
+  pack-to-json     NeDB(.db)パックファイルを個別の JSON ファイルに変換
   report           翻訳カバレッジをレポート表示
   validate         Babele 辞書 JSON の構造チェック
   placeholder-list 翻訳ファイル内のプレースホルダを一覧表示
