@@ -149,14 +149,19 @@ fvtt-tools fix-pack-names src/packs/macros
 ### `pack-to-json`
 
 ```
-fvtt-tools pack-to-json <pack.db> [オプション]
+fvtt-tools pack-to-json <pack-dir> [オプション]
 
-  --out    <dir>  出力ディレクトリ  (デフォルト: ./<pack名>/)
-  --indent <n>    JSON インデント幅 (デフォルト: 2)
+  --out <dir>      出力ディレクトリ          (デフォルト: ./<pack名>/)
+  --clean          出力先を先にクリア
+  --folders        フォルダ構造を再現
+  --omit-volatile  volatile フィールドを除外
+  --yaml           YAML で出力
 ```
 
+`@foundryvtt/foundryvtt-cli` の `extractPack` API を使用（要インストール）。
+
 ```bash
-fvtt-tools pack-to-json packs/macros.db --out src/packs/macros
+fvtt-tools pack-to-json packs/macros --out src/packs/macros --clean
 ```
 
 [詳細 →](docs/commands/pack-to-json.md)

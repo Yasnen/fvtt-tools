@@ -2,13 +2,23 @@
 
 ## 概要
 
-NeDB 形式（`.db`）の Foundry VTT パックファイルを個別の JSON ファイルに変換する。
-各ドキュメントを `<name>_<_id>.json` 形式で出力する。
+Foundry VTT の LevelDB パックを個別の JSON ファイルに変換する。
+`@foundryvtt/foundryvtt-cli` の `extractPack` Node.js API を内部で使用する。
 
 ## 使い方
 
 ```bash
-fvtt-tools pack-to-json <pack.db> [オプション]
+fvtt-tools pack-to-json <pack-dir> [オプション]
+```
+
+`<pack-dir>` は LevelDB パックのディレクトリパス（`packs/macros` など）。
+
+## 前提条件
+
+プロジェクトに `@foundryvtt/foundryvtt-cli` がインストールされていること:
+
+```bash
+npm install --save-dev @foundryvtt/foundryvtt-cli
 ```
 
 ## オプション
@@ -16,32 +26,44 @@ fvtt-tools pack-to-json <pack.db> [オプション]
 | オプション | デフォルト | 説明 |
 |-----------|-----------|------|
 | `--out <dir>` | `./<pack名>/` | 出力ディレクトリ |
-| `--indent <n>` | `2` | JSON インデント幅 |
-
-## 対象フォーマット
-
-NeDB 形式（`.db` ファイル）のみ対応。1行1ドキュメントの NDJSON 形式。
-
-LevelDB 形式（Foundry VTT v11 以降のデフォルト）には未対応。
-LevelDB パックは `@foundryvtt/foundryvtt-cli` の `fvtt package unpack` を使うこと。
+| `--clean` | — | 出力先を先にクリアしてから展開 |
+| `--folders` | — | フォルダ構造を再現する |
+| `--omit-volatile` | — | volatile フィールド（`_stats` 等）を除外 |
+| `--yaml` | — | JSON の代わりに YAML で出力 |
 
 ## 使用例
 
 ```bash
-# デフォルト出力先（./macros/）へ展開
-fvtt-tools pack-to-json packs/macros.db
+# 基本
+fvtt-tools pack-to-json packs/macros
 
-# 出力先を指定
-fvtt-tools pack-to-json packs/items.db --out src/packs/items
+# 出力先指定・クリーンアップ付き
+fvtt-tools pack-to-json packs/items --out src/packs/items --clean
+
+# フォルダ構造を再現しつつ volatile フィールドを除外
+fvtt-tools pack-to-json packs/actors --out src/packs/actors --folders --omit-volatile
 ```
 
-## 出力ファイル名
+## npm scripts との組み合わせ
 
-`<name>_<_id>.json` 形式。`name` に `/` `\` `*` `:` `|` `"` `<` `>` `?` が含まれる場合は `_` に置換する。
+```json
+{
+  "scripts": {
+    "unpack:macros": "fvtt-tools pack-to-json packs/macros --out src/packs/macros --clean"
+  }
+}
+```
 
-## NeDB 形式について
+## `fvtt package unpack` との違い
 
-Foundry VTT v10 以前の標準パック形式。各行が独立した JSON ドキュメントであり、
-NeDB が内部で管理する削除マーカー（`$$deleted: true`）行はスキップされる。
+| 比較点 | `fvtt package unpack` (CLI) | `pack-to-json` (Node.js API) |
+|--------|----------------------------|------------------------------|
+| 実行方法 | CLI サブコマンド経由 | `extractPack` API を直接呼び出し |
+| CLI バグの影響 | 受ける | 受けない |
+| セットアップ | `fvtt configure` が必要な場合あり | 不要 |
+| オプション | CLI フラグ経由 | API オプションを直接指定 |
 
-v11 以降で LevelDB に移行したモジュールには使用できない。
+## volatile フィールドについて
+
+`--omit-volatile` を指定すると `_stats`（作成・更新時刻など）が出力から除外される。
+ソース管理での不要な差分を防ぎたい場合に有効。

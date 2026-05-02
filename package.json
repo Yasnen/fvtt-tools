@@ -19,5 +19,13 @@
     "url": "git+https://github.com/Yasnen/fvtt-tools.git"
   },
   "keywords": ["foundryvtt", "fvtt", "localization", "module", "cli"],
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "@foundryvtt/foundryvtt-cli": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@foundryvtt/foundryvtt-cli": {
+      "optional": true
+    }
+  }
 }
