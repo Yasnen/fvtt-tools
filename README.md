@@ -32,7 +32,7 @@ npm install --save-dev github:Yasnen/fvtt-tools
 | `validate` | Babele 辞書 JSON の構造チェック | [→](docs/commands/validate.md) |
 | `placeholder-list` | 翻訳ファイル内のプレースホルダを一覧表示 | [→](docs/commands/placeholder-list.md) |
 | `fix-pack-names` | fvtt unpack 後の非 ASCII ファイル名を修正 | [→](docs/commands/fix-pack-names.md) |
-| `pack-to-json` | NeDB(.db) パックを個別 JSON ファイルに変換 | [→](docs/commands/pack-to-json.md) |
+| `pack-to-json` | モジュール/システムの全 pack を JSON ファイルに変換 | [→](docs/commands/pack-to-json.md) |
 
 ---
 
@@ -149,19 +149,23 @@ fvtt-tools fix-pack-names src/packs/macros
 ### `pack-to-json`
 
 ```
-fvtt-tools pack-to-json <pack-dir> [オプション]
+fvtt-tools pack-to-json <module-dir> [オプション]
 
-  --out <dir>      出力ディレクトリ          (デフォルト: ./<pack名>/)
+  --out <dir>      出力ベースディレクトリ (デフォルト: カレント)
+  --merge          各 pack を <moduleId>_<packName>.json にまとめる
   --clean          出力先を先にクリア
-  --folders        フォルダ構造を再現
+  --folders        フォルダ構造を再現 (--merge と併用不可)
   --omit-volatile  volatile フィールドを除外
-  --yaml           YAML で出力
+  --yaml           YAML で出力 (--merge と併用不可)
 ```
 
-`@foundryvtt/foundryvtt-cli` の `extractPack` API を使用（要インストール）。
+`module.json`/`system.json` を読み取り全 packs を一括処理。`@foundryvtt/foundryvtt-cli` の `extractPack` API を使用（要インストール）。
+
+出力名: `<moduleId>_<packName>/`（通常）または `<moduleId>_<packName>.json`（`--merge`）
 
 ```bash
-fvtt-tools pack-to-json packs/macros --out src/packs/macros --clean
+fvtt-tools pack-to-json ~/foundry/data/modules/wfrp4e-core --out ~/tmp
+fvtt-tools pack-to-json ~/foundry/data/modules/wfrp4e-core --out ~/tmp --merge
 ```
 
 [詳細 →](docs/commands/pack-to-json.md)

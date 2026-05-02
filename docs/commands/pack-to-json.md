@@ -2,16 +2,17 @@
 
 ## 概要
 
-Foundry VTT の LevelDB パックを個別の JSON ファイルに変換する。
+Foundry VTT モジュール/システムの全 LevelDB パックを JSON ファイルに変換する。
+`module.json` または `system.json` を読み取り、定義された全 `packs` を一括処理する。
 `@foundryvtt/foundryvtt-cli` の `extractPack` Node.js API を内部で使用する。
 
 ## 使い方
 
 ```bash
-fvtt-tools pack-to-json <pack-dir> [オプション]
+fvtt-tools pack-to-json <module-dir> [オプション]
 ```
 
-`<pack-dir>` は LevelDB パックのディレクトリパス（`packs/macros` など）。
+`<module-dir>` は `module.json` または `system.json` が置かれたモジュール/システムのルートディレクトリ。
 
 ## 前提条件
 
@@ -25,23 +26,34 @@ npm install --save-dev @foundryvtt/foundryvtt-cli
 
 | オプション | デフォルト | 説明 |
 |-----------|-----------|------|
-| `--out <dir>` | `./<pack名>/` | 出力ディレクトリ |
+| `--out <dir>` | カレントディレクトリ | 出力ベースディレクトリ |
+| `--merge` | — | 各 pack を `<moduleId>_<packName>.json` 一ファイルにまとめる |
 | `--clean` | — | 出力先を先にクリアしてから展開 |
-| `--folders` | — | フォルダ構造を再現する |
+| `--folders` | — | フォルダ構造を再現する（`--merge` と併用不可） |
 | `--omit-volatile` | — | volatile フィールド（`_stats` 等）を除外 |
-| `--yaml` | — | JSON の代わりに YAML で出力 |
+| `--yaml` | — | JSON の代わりに YAML で出力（`--merge` と併用不可） |
+
+## 出力命名規則
+
+| モード | 出力先 |
+|--------|--------|
+| 通常 | `<out>/<moduleId>_<packName>/` |
+| `--merge` | `<out>/<moduleId>_<packName>.json` |
 
 ## 使用例
 
 ```bash
-# 基本
-fvtt-tools pack-to-json packs/macros
+# 全 pack を個別 JSON ファイルに展開
+fvtt-tools pack-to-json ~/foundry/data/modules/wfrp4e-core --out ~/tmp
 
-# 出力先指定・クリーンアップ付き
-fvtt-tools pack-to-json packs/items --out src/packs/items --clean
+# 全 pack を各 JSON ファイル（pack 情報付き）にまとめる
+fvtt-tools pack-to-json ~/foundry/data/modules/wfrp4e-core --out ~/tmp --merge
 
-# フォルダ構造を再現しつつ volatile フィールドを除外
-fvtt-tools pack-to-json packs/actors --out src/packs/actors --folders --omit-volatile
+# システムも同様に処理可能
+fvtt-tools pack-to-json ~/foundry/data/systems/wfrp4e --omit-volatile --clean
+
+# volatile フィールドを除外してクリーン出力
+fvtt-tools pack-to-json ~/foundry/data/modules/wfrp4e-core --out src/packs --omit-volatile --clean
 ```
 
 ## npm scripts との組み合わせ
@@ -49,19 +61,24 @@ fvtt-tools pack-to-json packs/actors --out src/packs/actors --folders --omit-vol
 ```json
 {
   "scripts": {
-    "unpack:macros": "fvtt-tools pack-to-json packs/macros --out src/packs/macros --clean"
+    "unpack": "fvtt-tools pack-to-json ~/foundry/data/modules/wfrp4e-core --out src/packs --clean"
   }
 }
 ```
 
-## `fvtt package unpack` との違い
+## `--merge` 時の出力形式
 
-| 比較点 | `fvtt package unpack` (CLI) | `pack-to-json` (Node.js API) |
-|--------|----------------------------|------------------------------|
-| 実行方法 | CLI サブコマンド経由 | `extractPack` API を直接呼び出し |
-| CLI バグの影響 | 受ける | 受けない |
-| セットアップ | `fvtt configure` が必要な場合あり | 不要 |
-| オプション | CLI フラグ経由 | API オプションを直接指定 |
+```json
+{
+  "moduleId": "wfrp4e-core",
+  "name":     "items",
+  "label":    "Items",
+  "type":     "Item",
+  "path":     "packs/items",
+  "count":    123,
+  "entries":  [ ... ]
+}
+```
 
 ## volatile フィールドについて
 
