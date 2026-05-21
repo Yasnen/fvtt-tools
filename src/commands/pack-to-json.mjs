@@ -22,6 +22,7 @@ import { createRequire } from 'module';
 import { pathToFileURL } from 'url';
 import { mkdtemp, readdir, readFile, writeFile, rm, stat, mkdir } from 'fs/promises';
 import { tmpdir } from 'os';
+import { requireValue } from '../lib/json-utils.mjs';
 
 const args = process.argv.slice(2);
 
@@ -62,7 +63,7 @@ let yaml         = false;
 
 for (let i = 0; i < args.length; i++) {
   switch (args[i]) {
-    case '--out':          outBase      = resolve(args[++i]); break;
+    case '--out': outBase = resolve(requireValue(args, i++, '--out')); break;
     case '--merge':        merge        = true; break;
     case '--clean':        clean        = true; break;
     case '--folders':      folders      = true; break;

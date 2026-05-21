@@ -19,9 +19,9 @@
  *   --update-base              同期後に en-base.json を新en.jsonで更新
  */
 
-import { writeFileSync, readFileSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
-import { loadJson, flatten, C } from '../lib/json-utils.mjs';
+import { loadJson, flatten, C, requireValue } from '../lib/json-utils.mjs';
 
 // ===== 生テキストへの値置換 =====
 
@@ -191,16 +191,22 @@ let updateBase       = false;
 
 for (let i = 0; i < args.length; i++) {
   switch (args[i]) {
-    case '--base':         basePath = resolve(args[++i]); baseExplicit = true; break;
-    case '--ja':           jaPath        = resolve(args[++i]); break;
-    case '--out':          outPath       = resolve(args[++i]); break;
-    case '--extra-marker': extraMarker   = args[++i]; break;
+    case '--base':         basePath = resolve(requireValue(args, i++, '--base')); baseExplicit = true; break;
+    case '--ja':           jaPath   = resolve(requireValue(args, i++, '--ja')); break;
+    case '--out':          outPath  = resolve(requireValue(args, i++, '--out')); break;
+    case '--extra-marker': extraMarker = requireValue(args, i++, '--extra-marker'); break;
     case '--extra-prefix':
-      extraPrefixes = args[++i].split(',').map(s => s.trim()).filter(Boolean);
+      extraPrefixes = requireValue(args, i++, '--extra-prefix').split(',').map(s => s.trim()).filter(Boolean);
       break;
-    case '--placeholder-sep':    placeholderSep    = args[++i]; break;
-    case '--placeholder-mark':   placeholderMark   = args[++i]; break;
-    case '--placeholder-digits': placeholderDigits = parseInt(args[++i], 10); break;
+    case '--placeholder-sep':  placeholderSep  = requireValue(args, i++, '--placeholder-sep'); break;
+    case '--placeholder-mark': placeholderMark = requireValue(args, i++, '--placeholder-mark'); break;
+    case '--placeholder-digits':
+      placeholderDigits = parseInt(requireValue(args, i++, '--placeholder-digits'), 10);
+      if (isNaN(placeholderDigits)) {
+        console.error('エラー: --placeholder-digits には整数を指定してください。');
+        process.exit(1);
+      }
+      break;
     case '--dry-run':      dryRun        = true; break;
     case '--update-base':  updateBase    = true; break;
     default:
@@ -222,20 +228,28 @@ if (!outPath) outPath = jaPath;
 
 // ===== ファイル読み込み =====
 
-const newEnRaw = readFileSync(newEnPath, 'utf8');
-const newEn = loadJson(newEnPath, '新en.json');
-const ja    = loadJson(jaPath,    '翻訳ファイル');
+let newEnRaw, newEn;
+try {
+  newEnRaw = readFileSync(newEnPath, 'utf8');
+  newEn = JSON.parse(newEnRaw);
+} catch (e) {
+  if (e.code === 'ENOENT') {
+    console.error(`エラー: ファイルが見つかりません: ${newEnPath}`);
+  } else if (e instanceof SyntaxError) {
+    console.error(`エラー: JSON 解析失敗: ${newEnPath}: ${e.message}`);
+  } else {
+    console.error(`エラー: ファイルが読み込めません: ${newEnPath}: ${e.message}`);
+  }
+  process.exit(1);
+}
+const ja = loadJson(jaPath, '翻訳ファイル');
 
 let base = null;
-try {
+if (existsSync(basePath)) {
   base = loadJson(basePath, 'en-base.json');
-} catch (e) {
-  if (baseExplicit) {
-    console.error(`エラー: --base で指定されたファイルが読み込めません: ${basePath}`);
-    console.error(e.message);
-    process.exit(1);
-  }
-  // デフォルトパスが存在しない場合は CHANGED 検出をスキップ
+} else if (baseExplicit) {
+  console.error(`エラー: --base で指定されたファイルが見つかりません: ${basePath}`);
+  process.exit(1);
 }
 
 // ===== フラット化 =====
@@ -269,7 +283,7 @@ const warnings = {
   orphans: [],
 };
 
-const counter = { n: 0 };
+let counter = 0;
 const flatReplacements = new Map(); // dotPath -> 新しい文字列値
 
 for (const [path, newEnVal] of Object.entries(flatNewEn)) {
@@ -283,7 +297,7 @@ for (const [path, newEnVal] of Object.entries(flatNewEn)) {
     }
     if (jaVal !== newEnVal) flatReplacements.set(path, jaVal);
   } else {
-    const seq = String(++counter.n).padStart(placeholderDigits, '0');
+    const seq = String(++counter).padStart(placeholderDigits, '0');
     const placeholder = `${placeholderMark}(${placeholderSep}${seq})${placeholderMark}`;
     warnings.newKeys.push({ path, newVal: newEnVal, placeholder });
     flatReplacements.set(path, newEnVal + placeholder);

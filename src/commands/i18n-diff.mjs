@@ -9,7 +9,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { loadJson, flatten, C } from '../lib/json-utils.mjs';
+import { loadJson, flatten, C, requireValue } from '../lib/json-utils.mjs';
 
 const args = process.argv.slice(2);
 
@@ -41,13 +41,17 @@ let diffOnly = false;
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
   if (arg === '--from') {
-    fromPath = args[++i];
+    fromPath = requireValue(args, i++, '--from');
   } else if (arg === '--to') {
-    toPath = args[++i];
+    toPath = requireValue(args, i++, '--to');
   } else if (arg === '--lang') {
-    langFile = args[++i];
+    langFile = requireValue(args, i++, '--lang');
   } else if (arg === '--limit') {
-    limit = parseInt(args[++i], 10);
+    limit = parseInt(requireValue(args, i++, '--limit'), 10);
+    if (isNaN(limit)) {
+      console.error('エラー: --limit には整数を指定してください。');
+      process.exit(1);
+    }
   } else if (arg === '--diff-only') {
     diffOnly = true;
   }
@@ -213,6 +217,8 @@ function classifyCommit(hash) {
   }
 
   const { keys: touchedKeys } = result;
+
+  // touchedKeys は from リポジトリのキー変化のため toOnly キーは絶対に含まれない（判定不要）
 
   // SKIP: 全キーが same（または変更なし）
   if (touchedKeys.length === 0 || touchedKeys.every(k => same.has(k))) {

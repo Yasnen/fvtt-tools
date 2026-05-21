@@ -44,6 +44,22 @@ export function flatten(obj, prefix = '') {
   return result;
 }
 
+/**
+ * オプション引数の値を取得する。次のトークンが存在しない場合はエラーで終了。
+ * 使い方: `value = requireValue(args, i++, '--option')` — i++ で呼び出すこと。
+ * @param {string[]} args - process.argv スライス済み引数配列
+ * @param {number} i - 現在のインデックス（オプション名の位置）
+ * @param {string} optName - オプション名（エラーメッセージ用）
+ * @returns {string}
+ */
+export function requireValue(args, i, optName) {
+  if (i + 1 >= args.length) {
+    console.error(`エラー: ${optName} には値が必要です。`);
+    process.exit(1);
+  }
+  return args[i + 1];
+}
+
 // ANSI カラーコード
 export const C = {
   RESET:  '\x1b[0m',

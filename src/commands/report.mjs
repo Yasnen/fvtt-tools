@@ -13,7 +13,7 @@
  */
 
 import { resolve } from 'path';
-import { loadJson, flatten, C } from '../lib/json-utils.mjs';
+import { loadJson, flatten, C, requireValue } from '../lib/json-utils.mjs';
 
 const args = process.argv.slice(2);
 
@@ -45,10 +45,10 @@ let extraPrefixes = [];
 
 for (let i = 0; i < args.length; i++) {
   switch (args[i]) {
-    case '--ja':           jaPath        = resolve(args[++i]); break;
-    case '--base':         basePath      = resolve(args[++i]); break;
+    case '--ja':           jaPath   = resolve(requireValue(args, i++, '--ja')); break;
+    case '--base':         basePath = resolve(requireValue(args, i++, '--base')); break;
     case '--extra-prefix':
-      extraPrefixes = args[++i].split(',').map(s => s.trim()).filter(Boolean);
+      extraPrefixes = requireValue(args, i++, '--extra-prefix').split(',').map(s => s.trim()).filter(Boolean);
       break;
     default:
       console.error(`不明なオプション: ${args[i]}`);

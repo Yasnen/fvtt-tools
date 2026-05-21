@@ -13,7 +13,7 @@
 
 import { resolve } from 'path';
 import { existsSync } from 'fs';
-import { loadJson, flatten, C } from '../lib/json-utils.mjs';
+import { loadJson, flatten, C, requireValue } from '../lib/json-utils.mjs';
 
 const args = process.argv.slice(2);
 
@@ -40,8 +40,8 @@ let basePath = null;
 
 for (let i = 0; i < args.length; i++) {
   switch (args[i]) {
-    case '--ja':   jaPath   = resolve(args[++i]); break;
-    case '--base': basePath = resolve(args[++i]); break;
+    case '--ja':   jaPath   = resolve(requireValue(args, i++, '--ja')); break;
+    case '--base': basePath = resolve(requireValue(args, i++, '--base')); break;
     default:
       console.error(`不明なオプション: ${args[i]}`);
       process.exit(1);
