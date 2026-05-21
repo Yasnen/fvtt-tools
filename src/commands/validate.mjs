@@ -41,7 +41,13 @@ function collectFiles(paths) {
   const files = [];
   for (const p of paths) {
     const abs = resolve(p);
-    const stat = statSync(abs);
+    let stat;
+    try {
+      stat = statSync(abs);
+    } catch {
+      console.error(`エラー: パスにアクセスできません: ${abs}`);
+      process.exit(1);
+    }
     if (stat.isDirectory()) {
       for (const f of readdirSync(abs)) {
         if (extname(f) === '.json') files.push(join(abs, f));
@@ -63,16 +69,14 @@ if (files.length === 0) {
 let errorCount = 0;
 let warnCount  = 0;
 
-/**
- * @param {string} file
- * @param {string} msg
- */
-function error(file, msg) {
+/** @param {string} msg */
+function error(msg) {
   console.log(`  ${C.RED}[ERROR]${C.RESET} ${msg}`);
   errorCount++;
 }
 
-function warn(file, msg) {
+/** @param {string} msg */
+function warn(msg) {
   console.log(`  ${C.YELLOW}[WARN] ${C.RESET} ${msg}`);
   warnCount++;
 }
@@ -89,13 +93,13 @@ for (const file of files) {
   try {
     doc = JSON.parse(readFileSync(file, 'utf8'));
   } catch (e) {
-    error(file, `JSON 構文エラー: ${e.message}`);
+    error(`JSON 構文エラー: ${e.message}`);
     continue;
   }
 
   // label
   if (!doc.label) {
-    error(file, '"label" フィールドがありません');
+    error('"label" フィールドがありません');
   } else {
     ok(`label: "${doc.label}"`);
   }
@@ -104,7 +108,7 @@ for (const file of files) {
   const hasEntries = doc.entries != null;
   const hasMapping = doc.mapping != null;
   if (!hasEntries && !hasMapping) {
-    warn(file, '"entries" と "mapping" のどちらも存在しません');
+    warn('"entries" と "mapping" のどちらも存在しません');
   }
 
   // mapping 検証
@@ -112,7 +116,7 @@ for (const file of files) {
     let mappingErrors = 0;
     for (const [key, val] of Object.entries(doc.mapping)) {
       if (typeof val === 'object' && val !== null && !val.path) {
-        error(file, `mapping["${key}"] にオブジェクト形式で "path" フィールドがありません`);
+        error(`mapping["${key}"] にオブジェクト形式で "path" フィールドがありません`);
         mappingErrors++;
       }
     }
@@ -122,7 +126,7 @@ for (const file of files) {
   // entries 検証
   if (hasEntries) {
     if (typeof doc.entries !== 'object') {
-      error(file, '"entries" はオブジェクトまたは配列である必要があります');
+      error('"entries" はオブジェクトまたは配列である必要があります');
     } else if (Array.isArray(doc.entries)) {
       // 配列形式: 各エントリに id または name が必要
       let missingIdOrName = 0;
@@ -132,7 +136,7 @@ for (const file of files) {
         }
       }
       if (missingIdOrName > 0) {
-        warn(file, `entries(配列) 内 ${missingIdOrName} 件のドキュメントに "id"/"name" フィールドがありません`);
+        warn(`entries(配列) 内 ${missingIdOrName} 件のドキュメントに "id"/"name" フィールドがありません`);
       } else {
         ok(`entries(配列): ${doc.entries.length} ドキュメント — OK`);
       }
@@ -145,7 +149,7 @@ for (const file of files) {
         }
       }
       if (missingName > 0) {
-        warn(file, `entries 内 ${missingName} 件のドキュメントに "name" フィールドがありません`);
+        warn(`entries 内 ${missingName} 件のドキュメントに "name" フィールドがありません`);
       } else {
         ok(`entries: ${Object.keys(doc.entries).length} ドキュメント — OK`);
       }

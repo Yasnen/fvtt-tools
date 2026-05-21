@@ -9,8 +9,8 @@
  *   fvtt-tools fix-pack-names <dir>
  */
 
-import { readdirSync, readFileSync, renameSync, unlinkSync } from 'fs';
-import { join, extname } from 'path';
+import { readdirSync, readFileSync, renameSync, unlinkSync, existsSync, statSync } from 'fs';
+import { resolve, join, extname } from 'path';
 
 const args = process.argv.slice(2);
 
@@ -27,7 +27,16 @@ JSON 内の name フィールドを元に正規ファイル名へ修正します
   process.exit(0);
 }
 
-const dir = args[0];
+const dir = resolve(args[0]);
+
+if (!existsSync(dir)) {
+  console.error(`エラー: ディレクトリが見つかりません: ${dir}`);
+  process.exit(1);
+}
+if (!statSync(dir).isDirectory()) {
+  console.error(`エラー: パスがディレクトリではありません: ${dir}`);
+  process.exit(1);
+}
 
 /** ファイル名として使えない文字のみ _ に置換（日本語等は保持） */
 function toSafeFilename(str) {
@@ -40,7 +49,13 @@ const files = readdirSync(dir).filter(f => extname(f) === '.json');
 const byId = new Map();
 for (const file of files) {
   const filePath = join(dir, file);
-  const doc = JSON.parse(readFileSync(filePath, 'utf8'));
+  let doc;
+  try {
+    doc = JSON.parse(readFileSync(filePath, 'utf8'));
+  } catch (e) {
+    console.warn(`WARN: JSON パース失敗 (スキップ): ${file}: ${e.message}`);
+    continue;
+  }
   const id = doc._id;
   if (!id) {
     console.warn(`WARN: _id が見つかりません: ${file}`);
@@ -63,7 +78,7 @@ for (const [, entries] of byId) {
     }
   } else {
     // 重複あり: 正規名のファイルを残し、それ以外を削除
-    const canonical_path = join(dir, canonical);
+    const canonicalPath = join(dir, canonical);
     const keep = entries.find(e => e.file === canonical) ?? entries[0];
     for (const entry of entries) {
       if (entry.file === keep.file) continue;
@@ -71,7 +86,7 @@ for (const [, entries] of byId) {
       console.log(`DELETE: ${entry.file} (重複, ${keep.file} を保持)`);
     }
     if (keep.file !== canonical) {
-      renameSync(keep.filePath, canonical_path);
+      renameSync(keep.filePath, canonicalPath);
       console.log(`RENAME: ${keep.file} → ${canonical}`);
     }
   }
