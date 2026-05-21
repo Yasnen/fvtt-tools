@@ -5,6 +5,7 @@
  */
 
 const COMMANDS = {
+  'sync-journal':    () => import('../src/commands/sync-journal.mjs'),
   'sync-lang':       () => import('../src/commands/sync-lang.mjs'),
   'fix-pack-names':  () => import('../src/commands/fix-pack-names.mjs'),
   'pack-to-json':    () => import('../src/commands/pack-to-json.mjs'),
@@ -20,9 +21,10 @@ if (!command || command === '--help' || command === '-h') {
   console.log(`使い方: fvtt-tools <command> [options]
 
 コマンド:
+  sync-journal     Journal ローカライズ JSON を上流の HTML 構造変更に追従させる
   sync-lang        上流 en.json と翻訳ファイルを三方向マージで同期
   fix-pack-names   fvtt unpack 後の非ASCII ファイル名を修正
-  pack-to-json     NeDB(.db)パックファイルを個別の JSON ファイルに変換
+  pack-to-json     モジュール/システムの全 pack を JSON ファイルに変換
   report           翻訳カバレッジをレポート表示
   validate         Babele 辞書 JSON の構造チェック
   placeholder-list 翻訳ファイル内のプレースホルダを一覧表示
