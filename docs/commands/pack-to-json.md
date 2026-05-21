@@ -28,7 +28,7 @@ npm install --save-dev @foundryvtt/foundryvtt-cli
 |-----------|-----------|------|
 | `--out <dir>` | カレントディレクトリ | 出力ベースディレクトリ |
 | `--merge` | — | 各 pack を `<moduleId>_<packName>.json` 一ファイルにまとめる |
-| `--clean` | — | 出力先を先にクリアしてから展開 |
+| `--clean` | — | 出力先を先にクリアしてから展開（`--merge` 時は常に上書きのため効果なし） |
 | `--folders` | — | フォルダ構造を再現する（`--merge` と併用不可） |
 | `--omit-volatile` | — | volatile フィールド（`_stats` 等）を除外 |
 | `--yaml` | — | JSON の代わりに YAML で出力（`--merge` と併用不可） |

@@ -6,7 +6,7 @@ Foundry VTT モジュール開発・ローカライズ向け CLI ツール集。
 
 ## インストール
 
-GitHub プライベートリポジトリから直接インストール:
+GitHub リポジトリから直接インストール:
 
 ```bash
 npm install --save-dev github:Yasnen/fvtt-tools
