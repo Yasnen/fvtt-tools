@@ -26,6 +26,7 @@ npm install --save-dev github:Yasnen/fvtt-tools
 
 | コマンド | 説明 | 詳細 |
 |---------|------|------|
+| `sync-journal` | Journal ローカライズ JSON を上流の HTML 構造変更に追従 | [→](docs/commands/sync-journal.md) |
 | `sync-lang` | 上流 en.json と翻訳ファイルを三方向マージで同期 | [→](docs/commands/sync-lang.md) |
 | `i18n-diff` | 言語ファイルの差分比較・cherry-pick 可否判定 | [→](docs/commands/i18n-diff.md) |
 | `report` | 翻訳カバレッジをレポート表示 | [→](docs/commands/report.md) |
@@ -33,6 +34,25 @@ npm install --save-dev github:Yasnen/fvtt-tools
 | `placeholder-list` | 翻訳ファイル内のプレースホルダを一覧表示 | [→](docs/commands/placeholder-list.md) |
 | `fix-pack-names` | fvtt unpack 後の非 ASCII ファイル名を修正 | [→](docs/commands/fix-pack-names.md) |
 | `pack-to-json` | モジュール/システムの全 pack を JSON ファイルに変換 | [→](docs/commands/pack-to-json.md) |
+
+---
+
+### `sync-journal`
+
+```
+fvtt-tools sync-journal <input.json> [オプション]
+
+  --out <path>   出力先 (デフォルト: 入力ファイルと同じパス)
+  --dry-run      ファイルを変更せず差分・警告のみ表示
+```
+
+Babele Journal ローカライズ JSON の `_text`（旧原文）と `text_`（新原文）をセグメント単位で比較し、構造のみの変化は翻訳済み `text` に自動適用、テキスト変化・新規追加は `_needs_review` として記録する。
+
+```bash
+fvtt-tools sync-journal ja/wfrp4e-core.journals.json --dry-run
+```
+
+[詳細 →](docs/commands/sync-journal.md)
 
 ---
 
