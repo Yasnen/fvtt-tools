@@ -6,6 +6,9 @@
   "bin": {
     "fvtt-tools": "bin/fvtt-tools.mjs"
   },
+  "scripts": {
+    "test": "node --test"
+  },
   "files": [
     "bin/",
     "src/"
