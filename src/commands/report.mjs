@@ -13,7 +13,7 @@
  */
 
 import { resolve } from 'path';
-import { loadJson, flatten, C, requireValue } from '../lib/json-utils.mjs';
+import { loadJson, flatten, C, requireValue, findPlaceholder } from '../lib/json-utils.mjs';
 
 const args = process.argv.slice(2);
 
@@ -26,7 +26,7 @@ if (args[0] === '--help' || args[0] === '-h') {
   --extra-prefix <prefix>  集計から除外するキープレフィックス（カンマ区切り）
 
 判定ロジック:
-  ===(.XX)=== パターン  → プレースホルダ（未翻訳）
+  ===(XXX)=== を含む値  → プレースホルダ（未翻訳）
   ja値 === en値          → 英語のまま（未翻訳）
   それ以外               → 翻訳済み
 
@@ -56,8 +56,6 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
-const PLACEHOLDER_RE = /^===\(\.\d+\)===$/ ;
-
 const ja   = loadJson(jaPath,   '翻訳ファイル');
 const base = loadJson(basePath, 'en-base.json');
 
@@ -83,7 +81,7 @@ for (const [path, enVal] of Object.entries(flatBase)) {
     untranslated++;
     continue;
   }
-  if (typeof jaVal === 'string' && PLACEHOLDER_RE.test(jaVal)) {
+  if (findPlaceholder(jaVal) !== null) {
     placeholder++;
   } else if (jaVal === enVal) {
     untranslated++;
@@ -101,6 +99,6 @@ console.log(`  ベース(en)    : ${basePath}`);
 console.log('');
 console.log(`  総キー数（en）  : ${pad(total)}`);
 console.log(`  ${C.GREEN}翻訳済み${C.RESET}        : ${pad(translated)}  (${pct(translated)})`);
-console.log(`  ${C.YELLOW}プレースホルダ${C.RESET}  : ${pad(placeholder)}  (${pct(placeholder)})  ← ===(.XX)===`);
+console.log(`  ${C.YELLOW}プレースホルダ${C.RESET}  : ${pad(placeholder)}  (${pct(placeholder)})  ← ===(XXX)===`);
 console.log(`  ${C.RED}未翻訳（英語値）${C.RESET}: ${pad(untranslated)}  (${pct(untranslated)})`);
 console.log('');

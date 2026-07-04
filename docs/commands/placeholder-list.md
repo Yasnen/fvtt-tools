@@ -2,8 +2,10 @@
 
 ## 概要
 
-翻訳ファイル内のプレースホルダ（`===(.XX)===`）を一覧表示する。
+翻訳ファイル内のプレースホルダ（`===(XXX)===` を含む値）を一覧表示する。
 `sync-lang` が未翻訳の新規キーに付与したマーカーを確認するために使う。
+`--placeholder-sep` / `--placeholder-digits` を変更していても検出できる
+（`--placeholder-mark` をデフォルトの `===` から変更した場合は検出対象外）。
 
 ## 使い方
 
@@ -25,9 +27,11 @@ fvtt-tools placeholder-list [オプション]
   翻訳ファイル: lang/wfrp4e-ja.json
 
   ===(.01)===  WFRP4E.SomeKey.New
-               英語: "Some new string"
+               現在値: "Some new string===(.01)==="
+               英語  : "Some new string"
   ===(.02)===  WFRP4E.Another.Key
-               英語: "Another string"
+               現在値: "Another string===(.02)==="
+               英語  : "Another string"
 ```
 
 ## 使用例
@@ -44,6 +48,6 @@ fvtt-tools placeholder-list \
 
 ## プレースホルダ形式
 
-`===(.XX)===` の `XX` は 01 から始まる連番。
-`sync-lang` で `[NEW]` として追加されたキーに付与される。
+`sync-lang` で `[NEW]` として追加されたキーに、英語値の末尾へ `===(<sep><連番>)===` 形式で付与される（デフォルト: `===(.001)===`）。
+検出は「値に `===(` 〜 `)===` を含むか」で行うため、区切り文字・桁数のカスタマイズには依存しない。
 翻訳完了後は正式な翻訳文字列で置き換える。

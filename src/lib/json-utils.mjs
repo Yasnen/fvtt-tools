@@ -60,6 +60,25 @@ export function requireValue(args, i, optName) {
   return args[i + 1];
 }
 
+/**
+ * 未翻訳プレースホルダの検出用正規表現。
+ * sync-lang は英語値の末尾に `===(<sep><連番>)===` を追記するため、
+ * 値全体の完全一致ではなく部分一致で判定し、区切り文字列（--placeholder-sep）にも依存しない。
+ * 注意: --placeholder-mark をデフォルトの "===" から変更した場合は検出対象外。
+ */
+export const PLACEHOLDER_RE = /===\([^)]*\)===/;
+
+/**
+ * 値に含まれる未翻訳プレースホルダを返す。なければ null。
+ * @param {unknown} val
+ * @returns {string | null}
+ */
+export function findPlaceholder(val) {
+  if (typeof val !== 'string') return null;
+  const m = PLACEHOLDER_RE.exec(val);
+  return m ? m[0] : null;
+}
+
 // ANSI カラーコード
 export const C = {
   RESET:  '\x1b[0m',

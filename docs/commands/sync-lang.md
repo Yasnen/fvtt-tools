@@ -189,8 +189,9 @@ fvtt-tools sync-lang /path/to/en.json \
   --placeholder-digits 2
 ```
 
-> **注意:** `report` や `placeholder-list` はデフォルト形式 `===(.XXX)===` でプレースホルダを検出する。
-> フォーマットを変更した場合、これらのコマンドでは検出されなくなる。
+> **注意:** `report` や `placeholder-list` は「値に `===(` 〜 `)===` を含むか」でプレースホルダを検出する。
+> `--placeholder-sep` / `--placeholder-digits` の変更は検出に影響しないが、
+> `--placeholder-mark` をデフォルトの `===` から変更した場合は検出されなくなる。
 
 ---
 

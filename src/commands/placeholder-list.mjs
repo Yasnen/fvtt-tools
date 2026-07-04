@@ -1,7 +1,7 @@
 /**
  * placeholder-list.mjs
  *
- * 翻訳ファイル内のプレースホルダ（===(.XX)===）を一覧表示するコマンド。
+ * 翻訳ファイル内のプレースホルダ（===(XXX)=== を含む値）を一覧表示するコマンド。
  *
  * 使い方:
  *   fvtt-tools placeholder-list [オプション]
@@ -13,14 +13,14 @@
 
 import { resolve } from 'path';
 import { existsSync } from 'fs';
-import { loadJson, flatten, C, requireValue } from '../lib/json-utils.mjs';
+import { loadJson, flatten, C, requireValue, findPlaceholder } from '../lib/json-utils.mjs';
 
 const args = process.argv.slice(2);
 
 if (args[0] === '--help' || args[0] === '-h') {
   console.log(`使い方: fvtt-tools placeholder-list [オプション]
 
-翻訳ファイル内の未翻訳プレースホルダ ===(.XX)=== を一覧表示します。
+翻訳ファイル内の未翻訳プレースホルダ ===(XXX)=== を一覧表示します。
 --base を指定すると対応する英語値も表示します。
 
 オプション:
@@ -48,8 +48,6 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
-const PLACEHOLDER_RE = /^===\(\.\d+\)===$/;
-
 const ja      = loadJson(jaPath, '翻訳ファイル');
 const flatJa  = flatten(ja);
 
@@ -65,8 +63,9 @@ if (basePath) {
 
 const placeholders = [];
 for (const [path, val] of Object.entries(flatJa)) {
-  if (typeof val === 'string' && PLACEHOLDER_RE.test(val)) {
-    placeholders.push({ path, placeholder: val, enVal: flatBase?.[path] });
+  const marker = findPlaceholder(val);
+  if (marker !== null) {
+    placeholders.push({ path, marker, jaVal: val, enVal: flatBase?.[path] });
   }
 }
 
@@ -78,10 +77,11 @@ if (placeholders.length === 0) {
 console.log(`\n${C.BOLD}${C.CYAN}=== プレースホルダ一覧 (${placeholders.length}件) ===${C.RESET}`);
 console.log(`  翻訳ファイル: ${jaPath}\n`);
 
-for (const { path, placeholder, enVal } of placeholders) {
-  console.log(`  ${C.YELLOW}${placeholder}${C.RESET}  ${path}`);
+for (const { path, marker, jaVal, enVal } of placeholders) {
+  console.log(`  ${C.YELLOW}${marker}${C.RESET}  ${path}`);
+  console.log(`           現在値: ${JSON.stringify(jaVal)}`);
   if (enVal !== undefined) {
-    console.log(`           英語: ${JSON.stringify(enVal)}`);
+    console.log(`           英語  : ${JSON.stringify(enVal)}`);
   }
 }
 
