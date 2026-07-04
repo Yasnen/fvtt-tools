@@ -5,7 +5,7 @@
 
 import { writeFileSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-import { C } from '../lib/json-utils.mjs';
+import { C, requireValue } from '../lib/json-utils.mjs';
 
 // ===== HTML セグメント分割 =====
 
@@ -365,7 +365,7 @@ let dryRun = false;
 
 for (let i = 0; i < args.length; i++) {
   switch (args[i]) {
-    case '--out':     outPath = resolve(args[++i]); break;
+    case '--out':     outPath = resolve(requireValue(args, i++, '--out')); break;
     case '--dry-run': dryRun = true; break;
     default:
       if (!inputPath && !args[i].startsWith('--')) {
