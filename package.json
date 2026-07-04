@@ -1,6 +1,6 @@
 {
   "name": "@yasnen/fvtt-tools",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Foundry VTT module/localization development CLI tools",
   "type": "module",
   "bin": {
@@ -36,8 +36,5 @@
     "@foundryvtt/foundryvtt-cli": {
       "optional": true
     }
-  },
-  "devDependencies": {
-    "@yasnen/fvtt-tools": "github:Yasnen/fvtt-tools"
   }
 }
