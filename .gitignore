@@ -2,3 +2,17 @@ node_modules/
 
 # Claude Code のローカル設定・作業領域
 /.claude/
+/CLAUDE.local.md
+
+# Claude Code sandboxがルート直下へマスク生成するデバイスファイル
+/.bash_profile
+/.bashrc
+/.gitconfig
+/.gitmodules
+/.idea
+/.mcp.json
+/.profile
+/.ripgreprc
+/.vscode
+/.zprofile
+/.zshrc
